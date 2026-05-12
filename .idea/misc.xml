@@ -5,6 +5,9 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/aggregator/pom.xml" />
+        <option value="$PROJECT_DIR$/log-producer-one/pom.xml" />
+        <option value="$PROJECT_DIR$/log-producer-two/pom.xml" />
       </list>
     </option>
   </component>

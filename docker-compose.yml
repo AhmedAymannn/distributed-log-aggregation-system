@@ -12,3 +12,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3002:3002"
+
+  aggregator:
+    build:
+      context: ./aggregator
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
