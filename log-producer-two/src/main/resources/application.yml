@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: 3002
 spring:
   application:
     name: ProducerOneApplication

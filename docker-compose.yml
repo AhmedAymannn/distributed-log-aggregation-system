@@ -1,29 +1,14 @@
 services:
-
   producer-one:
     build:
       context: ./log-producer-one
       dockerfile: Dockerfile
-    container_name: log-producer-1
-    environment:
-      - SERVER_PORT=3001
     ports:
       - "3001:3001"
-    networks:
-      - log-network
 
   producer-two:
     build:
       context: ./log-producer-two
       dockerfile: Dockerfile
-    container_name: log-producer-2
-    environment:
-      - SERVER_PORT=3002
     ports:
       - "3002:3002"
-    networks:
-      - log-network
-
-networks:
-  log-network:
-    driver: bridge
