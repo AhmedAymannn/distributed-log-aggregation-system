@@ -23,13 +23,6 @@ The Distributed Log Aggregation System provides a scalable and modular framework
 - **Message Delivery Layer:** Delivers messages from producers to downstream components for aggregation, storage, or analysis.
 - **Decoupling:** Producers and consumers are separated, allowing scalable, reliable, and asynchronous log handling.
 
-```mermaid
-graph LR
-    Producer1[Producer One] -- Sends Event Messages --> Delivery[Message Delivery Layer]
-    Producer2[Producer Two] -- Sends Event Messages --> Delivery
-    Delivery -- Forwards Messages --> Aggregator
-    Aggregator -- Processes Logs --> Storage/Monitoring
-```
 
 ## Getting Started
 
@@ -59,19 +52,6 @@ docker-compose up --build
 
 ## Directory Structure
 
-```
-.
-├── docker-compose.yml
-├── log-producer-one/
-│   ├── Dockerfile
-│   ├── pom.xml
-│   └── src/
-├── log-producer-two/
-│   ├── Dockerfile
-│   ├── pom.xml
-│   └── src/
-└── ...
-```
 
 - `docker-compose.yml`: Defines and orchestrates producer services.
 - `log-producer-one/`, `log-producer-two/`: Individual producer microservices, each responsible for emitting event messages.
