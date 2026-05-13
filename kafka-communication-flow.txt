@@ -1,0 +1,82 @@
+==========================================================================
+KAFKA DOCKER-TO-LOCAL COMMUNICATION FLOW
+==========================================================================
+
+[1] ARCHITECTURE OVERVIEW
+--------------------------------------------------------------------------
+Your system operates in two "Worlds" separated by the Docker Bridge.
+- LOCAL WORLD: Java Apps (Producer & Aggregator)
+- DOCKER WORLD: Kafka & Zookeeper Containers
+
+The "Bridge" is created by Port Mapping (9092:9092).
+
+[2] THE ASCII MAP
+--------------------------------------------------------------------------
+
+       LOCAL HOST (Your PC)          |          DOCKER WORLD (Container)
+=====================================|=========================================
+                                     |
+  [ PRODUCER APP ]                   |          [ KAFKA CONTAINER ]
+  ----------------                   |          ------------------
+  Config:                            |          Config:
+  bootstrap.servers=localhost:9092   |          KAFKA_ADVERTISED_LISTENERS:
+         |                           |          PLAINTEXT_HOST://localhost:9092
+         |                           |                      |
+    (1) PUSH LOG                     |                (2) RECEIVE & STORE
+         |                           |                      |
+         V                           |                      V
+  _______________________            |            _______________________
+ |      PORT 9092        | <---(A)---/---(B)---> |   INTERNAL PORT 9092  |
+ |  (Physical Entrance)  |           |           |   (Container Gateway) |
+ |_______________________|           |           |_______________________|
+         ^                           |                      |
+         |                           |                      |
+    (4) RECEIVE LOG                  |                (3) SEND BACK
+         |                           |                      |
+         |                           |                      V
+  [ AGGREGATOR APP ]                 |           [ KAFKA STORAGE (LOGS) ]
+  ------------------                 |           ------------------------
+  Config:                            |           Topic: "app-logs"
+  bootstrap.servers=localhost:9092   |           Offset: 0, 1, 2...
+                                     |
+=====================================|=========================================
+      (A) & (B) = Docker Config:  "ports: - 9092:9092"
+
+
+[3] DETAILED DATA JOURNEY
+--------------------------------------------------------------------------
+
+PHASE A: THE PRODUCER (SENDING)
+1. App executes: log.info("Message")
+2. App looks at bootstrap.servers (localhost:9092).
+3. App sends data to Local PC Port 9092.
+4. Docker intercepts Port 9092 and forwards it to the Kafka Container.
+5. Kafka stores the message in a Topic.
+
+PHASE B: THE AGGREGATOR (RECEIVING)
+1. Aggregator starts a @KafkaListener thread.
+2. Aggregator looks at bootstrap.servers (localhost:9092).
+3. Aggregator opens a persistent "Straw" (TCP Socket) to Local Port 9092.
+4. Docker forwards this request to Kafka inside the container.
+5. Kafka sees the "Straw" and pours stored data back down the pipe.
+6. Aggregator code receives the string and prints it.
+
+[4] KEY CONFIGURATION LINKS
+--------------------------------------------------------------------------
+- DOCKER PORT: 9092:9092
+  Connects your physical machine's "door" to Kafka's "door."
+
+- KAFKA_ADVERTISED_LISTENERS: localhost:9092
+  Tells Kafka to tell external apps: "Talk to me using the name 'localhost'."
+
+- SPRING BOOT BOOTSTRAP SERVERS: localhost:9092
+  Tells your Java code where to find the "door" to the Kafka building.
+
+[5] WHY THEY DON'T CLASH
+--------------------------------------------------------------------------
+The Producer and Aggregator do not talk to each other directly.
+Port 9092 is a SERVER port. Kafka is the only server.
+- The Producer is a CLIENT making a "Write" request.
+- The Aggregator is a CLIENT making a "Read" request.
+The OS routes both to Kafka, which acts as the intelligent traffic controller.
+==========================================================================

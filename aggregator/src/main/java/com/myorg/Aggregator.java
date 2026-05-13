@@ -11,6 +11,5 @@ public class Aggregator {
         System.out.println("======================");
         System.out.println("Hello from Aggregator");
         System.out.println("======================");
-
     }
 }

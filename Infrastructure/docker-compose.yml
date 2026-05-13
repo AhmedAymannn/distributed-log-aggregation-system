@@ -1,0 +1,64 @@
+services:
+  # --- INFRASTRUCTURE: KAFKA (KRaft Mode) ---
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    environment:
+      #KRaft Engine Setup
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+
+
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+#    volumes:
+#      - ../kafka/data:/var/lib/kafka/data
+
+  # --- APPLICATIONS
+
+  # =============================================
+  # --- PRODUCER_1
+  producer-one:
+    build:
+      context: ../log-producer-one
+      dockerfile: Dockerfile
+    container_name: producer-one
+    ports:
+      - "3001:3001"
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+
+  # =============================================
+  # --- PRODUCER_2
+  producer-two:
+    build:
+      context: ../log-producer-two
+      dockerfile: Dockerfile
+    container_name: producer-two
+    ports:
+      - "3002:3002"
+
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+  # =============================================
+  # --- CONSUMER
+  aggregator:
+    build:
+      context: ../aggregator
+      dockerfile: Dockerfile
+    container_name: aggregator
+    depends_on:
+      - kafka
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    ports:
+      - "3003:3003"

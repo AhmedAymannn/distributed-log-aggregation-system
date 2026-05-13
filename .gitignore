@@ -3,6 +3,13 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+
+# Infrastructure & Data
+/kafka/data/
+/Infrastructure/data/
+
+# Logs files
+**/*.log
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml

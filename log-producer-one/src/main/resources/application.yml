@@ -3,3 +3,16 @@ server:
 spring:
   application:
     name: ProducerOneApplication
+
+logging:
+  file:
+    name: log-producer-one/producer_1.log # This creates a folder 'logs' and a file 'app.log'
+  level:
+    root: INFO
+    com.example: DEBUG
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
