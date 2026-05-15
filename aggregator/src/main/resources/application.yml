@@ -7,6 +7,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
+      fetch.min.bytes: 500
       auto-offset-reset: earliest
       group-id: aggregator-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

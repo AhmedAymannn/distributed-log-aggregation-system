@@ -18,7 +18,6 @@ public class AggregatorService {
         saveToDB();
 
     }
-    
     public void saveToDB (){
         // saving to dataBase
     }

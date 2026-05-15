@@ -1,4 +1,4 @@
-package com.myorg.Consumer;
+package com.myorg.common;
 
 public class ConsumerErrorHandler {
 }

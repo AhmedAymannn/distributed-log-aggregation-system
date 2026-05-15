@@ -42,10 +42,11 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
+
         factory.setConsumerFactory(consumerFactory());
-        // These goals are achieved via the Factory, not the YML
-        factory.setConcurrency(3);      // Goal: Parallelism
-        factory.setBatchListener(true);  // Goal: Efficiency (Aggregator style)
+        factory.setConcurrency(1);    // one thread
+        factory.setBatchListener(true);
+
         return factory;
     }
 }
