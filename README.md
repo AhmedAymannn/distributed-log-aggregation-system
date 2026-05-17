@@ -1,4 +1,4 @@
-# Distributed Log Aggregation System
+🌐 Distributed Log Aggregation System
 
 A scalable, containerized log aggregation framework demonstrating microservices (producers) sending log/event data directly to a central Kafka broker, with one or more aggregators consuming and processing those logs. The system is decoupled and easy to extend, deployed via Docker Compose.
 
