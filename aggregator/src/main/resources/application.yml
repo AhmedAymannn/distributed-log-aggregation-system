@@ -3,12 +3,17 @@ server:
 spring:
   application:
     name: AggregatorApp
-
   kafka:
     bootstrap-servers: localhost:9092
+    listener:
+      type: batch
     consumer:
       fetch.min.bytes: 500
       auto-offset-reset: earliest
       group-id: aggregator-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  data:
+    mongodb:
+      # Format: mongodb://username:password@host:port/database_name
+      uri: mongodb://admin:password123@localhost:27017/logs_db

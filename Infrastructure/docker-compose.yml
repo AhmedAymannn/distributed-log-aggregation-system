@@ -1,5 +1,7 @@
 services:
-  # --- INFRASTRUCTURE: KAFKA (KRaft Mode) ---
+  # ---------------------------------------------------------------------------
+  # KAFKA MESSAGING LAYER (KRaft mode)
+  # ---------------------------------------------------------------------------
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
@@ -20,8 +22,8 @@ services:
       KAFKA_LOG_RETENTION_BYTES: 1073741824
     ports:
       - "9092:9092"
-#    volumes:
-#      - ../kafka/data:/var/lib/kafka/data
+    volumes:
+      - ../kafka/data:/var/lib/kafka/data
 
   # kafka UI
   kafka-ui:
@@ -34,10 +36,22 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092 # Use internal port
     depends_on:
       - kafka
-  # --- APPLICATIONS
-
-  # =============================================
-  # --- PRODUCER_1
+    # ---------------------------------------------------------------------------
+    # MONGO DATABASE LAYER (Headless & High-Throughput Optimized)
+    # ---------------------------------------------------------------------------
+    mongoDB:
+      image: mongo:8.0
+      container_name: log_aggregator_db
+      ports:
+        - "27017:27017"
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: admin
+        MONGO_INITDB_ROOT_PASSWORD: password123
+      volumes:
+        - mongo_data:/data/db
+    # ---------------------------------------------------------------------------
+    # Applications LAYER (2 Producers / 1 Consumer)
+    # ---------------------------------------------------------------------------
   producer-one:
     build:
       context: ../log-producer-one
