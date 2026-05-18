@@ -10,7 +10,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Configuration
 public class KafkaConsumerConfig {
     // Injecting values from your application.yml
@@ -42,11 +41,9 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
-
         factory.setConsumerFactory(consumerFactory());
         factory.setConcurrency(1);    // one thread
         factory.setBatchListener(true);
-
         return factory;
     }
 }
