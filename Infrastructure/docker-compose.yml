@@ -87,3 +87,6 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     ports:
       - "${PORT_AGGREGATOR}:3003"
+
+volumes:
+  mongo_data:
