@@ -12,9 +12,6 @@ import java.io.IOException;
 @Service
 public class AggregatorService {
 
-    // Define the path to your test output file
-    private static final String OUTPUT_FILE_PATH = "received-app-logs.txt";
-
     @KafkaListener(topics = "app-logs", groupId = "aggregator-group")
     public void processLogs(String rawLog,
                             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
@@ -28,18 +25,7 @@ public class AggregatorService {
                 "[KAFKA-METADATA | Partition: %d | Offset: %d]%n%s%n",
                 partition, offset, rawLog
         );
-
-        // 3. Throw it to the file
-        saveToFile(formattedLogEntry);
+        // saving to DB
     }
 
-    private synchronized void saveToFile(String content) {
-        // Using standard Java FileWriter in append mode (true)
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(OUTPUT_FILE_PATH, true))) {
-            writer.write(content);
-            writer.newLine(); // Add an extra space between log events
-        } catch (IOException e) {
-            System.err.println("Error writing consumed log to file: " + e.getMessage());
-        }
-    }
 }

@@ -9,19 +9,14 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import java.util.HashMap;
 import java.util.Map;
-
 @Configuration
 public class KafkaConsumerConfig {
-    // Injecting values from your application.yml
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
-
     @Value("${spring.kafka.consumer.auto-offset-reset:earliest}")
     private String autoOffsetReset;
-
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -30,10 +25,8 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-
         return new DefaultKafkaConsumerFactory<>(props);
     }
-
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
