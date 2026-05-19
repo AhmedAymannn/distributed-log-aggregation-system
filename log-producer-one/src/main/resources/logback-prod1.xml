@@ -1,18 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml" />
-    <!-- This is the "A" entrance to your pipeline -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <!-- Read the application name from application.yml -->
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="unknown-service"/>
+
     <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
-        <encoder class="com.github.danielwegener.logback.kafka.encoding.LayoutKafkaMessageEncoder">
-            <layout class="ch.qos.logback.classic.PatternLayout">
-                <pattern>%d{HH:mm:ss.SSS} [PROD-1] [%thread] %-5level %logger{36} - %msg%n</pattern>            </layout>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <!-- 1. Match 'timestamp' exactly with our Instant field -->
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+
+                <!-- 2. Match 'logLevel' exactly with our record field -->
+                <logLevel>
+                    <fieldName>logLevel</fieldName>
+                </logLevel>
+
+                <message/> <!-- Maps to 'message' -->
+
+                <!-- 3. Extract your Distributed Trace ID directly to the root JSON level -->
+                <mdc>
+                    <includeMdcKeyName>traceId</includeMdcKeyName>
+                </mdc>
+
+                <!-- 4. Inject application name and group secondary technical info into metadata -->
+                <customFields>
+                    {
+                    "serviceName": "${appName}"
+                    }
+                </customFields>
+
+                <!-- 5. Shove internal log details into the metadata map automatically -->
+                <nestedFieldProviders>
+                    <fieldName>metadata</fieldName>
+                    <providers>
+                        <threadName><fieldName>thread</fieldName></threadName>
+                        <loggerName><fieldName>loggerClass</fieldName></loggerName>
+                        <stackTrace><fieldName>stackTrace</fieldName></stackTrace>
+                    </providers>
+                </nestedFieldProviders>
+            </providers>
         </encoder>
+
         <topic>app-logs</topic>
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy" />
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
-        <!-- Pointing to your Docker Bridge -->
         <producerConfig>bootstrap.servers=localhost:9092</producerConfig>
     </appender>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="KAFKA" />

@@ -5,6 +5,7 @@ spring:
     name: ProducerOneApplication
 
 logging:
+  config: classpath:logback-spring.xml
   file:
     name: log-producer-one/producer_1.log # This creates a folder 'logs' and a file 'app.log'
   level:
