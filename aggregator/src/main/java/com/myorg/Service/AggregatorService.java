@@ -14,9 +14,8 @@ import java.util.List;
 public class AggregatorService {
 
     @KafkaListener(topics = "app-logs", groupId = "aggregator-group")
-    public void processLogs(List<String> logs,
-                            @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
-                            @Header(KafkaHeaders.OFFSET) long offset) {
+    public void processLogs(List <String> logs) {
+
 
     }
 
