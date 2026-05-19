@@ -9,8 +9,8 @@ logging:
   file:
     name: log-producer-one/producer_1.log # This creates a folder 'logs' and a file 'app.log'
   level:
-    root: INFO
-    com.example: DEBUG
+    root: WARN
+    com.myorg: INFO
 
   kafka:
     bootstrap-servers: localhost:9092

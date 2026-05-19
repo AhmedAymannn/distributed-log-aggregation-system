@@ -1,139 +1,580 @@
-🌐 Distributed Log Aggregation System
+# ?? Distributed Log Aggregation System
 
-A scalable, containerized log aggregation framework demonstrating microservices (producers) sending log/event data directly to a central Kafka broker, with one or more aggregators consuming and processing those logs. The system is decoupled and easy to extend, deployed via Docker Compose.
+[![Java Version](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.14-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Kafka](https://img.shields.io/badge/Kafka-7.5.0-black.svg)](https://kafka.apache.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.0-green.svg)](https://www.mongodb.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://www.docker.com/)
+
+A production-ready, scalable distributed log aggregation system demonstrating microservices architecture with direct Kafka integration. The system features multiple log producers streaming events to a central Kafka broker, with aggregators consuming, processing, and persisting logs to MongoDB for analytics and monitoring.
 
 ---
 
-## Table of Contents
+## ?? Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
-- [Getting Started](#getting-started)
-- [Directory Structure](#directory-structure)
-- [Usage](#usage)
+- [Tech Stack](#tech-stack)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [API Endpoints](#api-endpoints)
+- [Monitoring](#monitoring)
+- [Development](#development)
 - [Extending the System](#extending-the-system)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
 
 ---
 
-## Overview
+## ?? Overview
 
-This project provides a practical demonstration of distributed log/event aggregation using:
+This project implements a modern distributed logging architecture without intermediary agents or collectors. Log producers write directly to Kafka using the logback-kafka-appender, while aggregators independently consume from Kafka topics and persist structured logs to MongoDB with automatic TTL indexing.
 
-- **Log Producers:** Microservices generating event logs.
-- **Kafka Broker:** A central, scalable message queue that stores events.
-- **Log Aggregators:** Applications that consume and process logs from Kafka (for storage, analytics, or forwarding).
+### Key Design Principles
 
-There are **no intermediary “agents”** or collectors—log producers write directly to Kafka; aggregators independently pull from Kafka.
-
----
-
-## Architecture
-
-```
-+----------------+         +-------------------+         +----------------+
-| Log Producer 1 | ----+   |                   |   +---- | Log Aggregator |
-+----------------+     |   |                   |   |     +----------------+
-                       +-->|      Kafka        |<--+
-+----------------+     |   |    (Broker)       |   |     +----------------+
-| Log Producer 2 | ----+   |                   |   +---- | Log Aggregator |
-+----------------+         +-------------------+         +----------------+
-```
-- **Producers**: Directly emit logs to Kafka (`localhost:9092`).
-- **Kafka**: Receives, stores, and buffers event messages in topics (e.g., `app-logs`).
-- **Aggregators**: Subscribe to Kafka topics; process and act on received logs.
-
-There are **no dedicated agents, sidecars, or file-collecting daemons**.
+- **Direct Integration**: Producers connect directly to Kafka�no sidecars, agents, or file collectors
+- **Decoupled Architecture**: Producers and aggregators operate independently through Kafka topics
+- **Scalability**: Horizontal scaling of both producers and aggregators
+- **Persistence**: MongoDB storage with 7-day automatic log expiration
+- **Observability**: Kafka UI for real-time topic monitoring and message inspection
 
 ---
 
-## Getting Started
+## ??? Architecture
 
-### Prerequisites
+```
++-----------------------------------------------------------------------------+
+�                           DISTRIBUTED LOG SYSTEM                             �
++-----------------------------------------------------------------------------�
+�                                                                             �
+�  +--------------+      +--------------------------------------+            �
+�  �   Producer 1 �      �                                      �            �
+�  �  (Port 3001) �------�                                      �            �
+�  +--------------+      �                                      �            �
+�                        �         +--------------+            �            �
+�  +--------------+      �         �              �            �            �
+�  �   Producer 2 �------+--------?�    KAFKA     �------------+-----------?�
+�  �  (Port 3002) �      �         �  (KRaft)     �            �           � �
+�  +--------------+      �         �   Port 9092  �            �           � �
+�                        �         +--------------+            �           � �
+�                        �                                      �           � �
+�                        +--------------------------------------+           � �
+�                                                              �             � �
+�                                                              ?             � �
+�                                                    +------------------+    � �
+�                                                    �   AGGREGATOR     �    � �
+�                                                    �   (Port 3003)    �    � �
+�                                                    �   Batch Consumer �    � �
+�                                                    +------------------+    � �
+�                                                             �              � �
+�                                                             ?              � �
+�                                                    +------------------+    � �
+�                                                    �    MONGODB       �    � �
+�                                                    �  (Port 27017)    �    � �
+�                                                    �  7-day TTL       �    � �
+�                                                    +------------------+    � �
+�                                                                             �
++-----------------------------------------------------------------------------+
+```
 
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/)
+### Data Flow
 
-### Clone and Start
+1. **Producers** generate application logs using SLF4J/Logback
+2. **logback-kafka-appender** serializes logs to JSON and publishes to Kafka topic `app-logs`
+3. **Kafka** (KRaft mode) buffers and distributes messages to consumer groups
+4. **Aggregator** consumes logs in batches using Spring Kafka
+5. **MongoDB** persists structured logs with automatic indexing and TTL cleanup
+
+---
+
+## ??? Tech Stack
+
+| Component | Technology | Version |
+|-----------|-----------|---------|
+| **Language** | Java | 21 |
+| **Framework** | Spring Boot | 3.5.14 |
+| **Message Broker** | Apache Kafka | 7.5.0 (KRaft mode) |
+| **Database** | MongoDB | 8.0 |
+| **Build Tool** | Maven | Latest |
+| **Containerization** | Docker & Docker Compose | Latest |
+| **Log Appender** | logback-kafka-appender | 0.1.0 |
+| **Log Encoder** | logstash-logback-encoder | 8.0 |
+| **Kafka UI** | provectuslabs/kafka-ui | Latest |
+
+---
+
+## ? Features
+
+- **Direct Kafka Integration**: No intermediate agents�producers write directly to Kafka
+- **KRaft Mode**: Kafka runs without Zookeeper for simplified deployment
+- **Batch Processing**: Aggregator consumes logs in batches for optimal throughput
+- **Structured Logging**: JSON-formatted logs with consistent schema across services
+- **Auto-Expiring Logs**: MongoDB TTL index automatically removes logs after 7 days
+- **Distributed Tracing**: Trace ID support for request correlation
+- **Service Identification**: Each log includes source service name
+- **Kafka UI**: Web-based interface for monitoring topics and messages
+- **Environment Configuration**: Centralized .env file for easy customization
+- **Hot Reload**: Configuration changes via application.yml
+
+---
+
+## ?? Prerequisites
+
+Before running this project, ensure you have installed:
+
+- **Docker** >= 20.10 ([Download](https://www.docker.com/get-started))
+- **Docker Compose** >= 2.0 ([Download](https://docs.docker.com/compose/install/))
+- **Java 21** (for local development, optional for Docker deployment)
+- **Maven 3.8+** (for local development, optional for Docker deployment)
+
+---
+
+## ?? Quick Start
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/AhmedAymannn/distributed-log-aggregation-system.git
 cd distributed-log-aggregation-system
+```
+
+### 2. Configure Environment (Optional)
+
+Edit `Infrastructure/.env` to customize ports and credentials:
+
+```env
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=super_secret_secure_password_2026
+KAFKA_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+
+PORT_KAFKA=9092
+PORT_KAFKA_UI=8081
+PORT_PRODUCER_ONE=3001
+PORT_PRODUCER_TWO=3002
+PORT_AGGREGATOR=3003
+```
+
+### 3. Start All Services
+
+```bash
+cd Infrastructure
 docker-compose up --build
 ```
 
-Services are accessible at:
-- Producer One: [http://localhost:3001](http://localhost:3001)
-- Producer Two: [http://localhost:3002](http://localhost:3002)
+### 4. Verify Services
 
-Kafka is exposed at `localhost:9092` for both producers and aggregators.
+- **Producer One**: http://localhost:3001
+- **Producer Two**: http://localhost:3002
+- **Aggregator**: http://localhost:3003
+- **Kafka UI**: http://localhost:8081
+- **Kafka Broker**: localhost:9092
+- **MongoDB**: localhost:27017
 
----
+### 5. Stop Services
 
-## Directory Structure
-
-```
-docker-compose.yml          # Orchestrates all services
-log-producer-one/          # Code for Producer 1
-log-producer-two/          # Code for Producer 2
-aggregator/                # Log aggregation/consumer service
-kafka-communication-flow.txt # Technical docs about data flow and port mapping
+```bash
+docker-compose down
 ```
 
----
+To remove volumes (including MongoDB data):
 
-## Usage
-
-- **Producers emit logs/events**: Each microservice generates log messages sent directly to Kafka.
-- **Kafka stores events**: Logs are buffered in topics, decoupling producers from consumers.
-- **Aggregators consume events**: Log aggregator applications (can be more than one) subscribe to Kafka and process or persist logs.
-
-_Example:_  
-A Java producer logs a message; its Kafka client submits the event over TCP to Kafka, which stores it. The aggregator uses a Kafka consumer to read, transform, or display the log.
+```bash
+docker-compose down -v
+```
 
 ---
 
-## Extending the System
+## ?? Configuration
 
-### Add a Producer
+### Kafka Configuration
 
-1. Copy an existing `log-producer-*` directory as a template.
-2. Update your new producer as needed.
-3. Register it in `docker-compose.yml`:
+Kafka runs in **KRaft mode** (Zookeeper-less) with the following key settings:
 
-    ```yaml
-    services:
-      new-producer:
-        build:
-          context: ./new-producer
-          dockerfile: Dockerfile
-        ports:
-          - "3003:3003"
-    ```
+- **Cluster ID**: Configured in `.env`
+- **Listeners**: PLAINTEXT (internal), PLAINTEXT_HOST (external)
+- **Log Retention**: 1GB per topic
+- **Replication Factor**: 1 (single-broker setup)
 
-### Add an Aggregator
+### Producer Configuration
 
-1. Create a new service that connects to Kafka at `localhost:9092` and subscribes to a topic.
-2. Register it in `docker-compose.yml`.
-3. Aggregators can filter, store, or visualize logs as needed.
+Each producer uses `lgogback-sprin.xml` for Kafka appender configuration:
+
+```xml
+<appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    <topic>app-logs</topic>
+    <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy"/>
+</appender>
+```
+
+### Aggregator Configuration
+
+The aggregator uses batch consumption for optimal performance:
+
+```yaml
+spring:
+  kafka:
+    listener:
+      type: batch
+    consumer:
+      fetch.min.bytes: 500
+      auto-offset-reset: earliest
+      group-id: aggregator-group
+```
+
+### MongoDB Configuration
+
+Logs are stored with automatic TTL expiration:
+
+```java
+@Indexed(name = "ttl_index", expireAfter = "7d")
+Instant timestamp
+```
 
 ---
 
-## Contributing
+## ?? Project Structure
 
-Contributions, issues, and pull requests are welcome!
-- Fork the repo, make your changes, and submit via Pull Request.
+```
+distributed-log-aggregation-system/
++-- Infrastructure/
+�   +-- .env                      # Environment variables
+�   +-- docker-compose.yml        # Service orchestration
++-- aggregator/
+�   +-- src/main/
+�   �   +-- java/com/myorg/
+�   �   �   +-- Aggregator.java           # Main application
+�   �   �   +-- Service/
+�   �   �   �   +-- AggregatorService.java # Log processing logic
+�   �   �   +-- config/
+�   �   �   �   +-- KafkaConsumerConfig.java
+�   �   �   +-- document/
+�   �   �   �   +-- LogDocument.java      # MongoDB document model
+�   �   �   +-- repository/
+�   �   �   �   +-- LogRepository.java    # MongoDB repository
+�   �   �   +-- common/
+�   �   �   �   +-- ConsumerErrorHandler.java
+�   �   �   +-- api/
+�   �   �       +-- LogController.java
+�   �   +-- resources/
+�   �       +-- application.yml
+�   +-- Dockerfile
+�   +-- pom.xml
++-- log-producer-one/
+�   +-- src/main/
+�   �   +-- java/com/myorg/
+�   �   �   +-- ProducerOne.java
+�   �   +-- resources/
+�   �       +-- application.yml
+�   �       +-- logback-spring.xml
+�   +-- Dockerfile
+�   +-- pom.xml
++-- log-producer-two/
+�   +-- src/main/
+�   �   +-- java/com/myorg/
+�   �   �   +-- ProducerTwo.java
+�   �   +-- resources/
+�   �       +-- application.yml
+�   �       +-- logback-spring.xml
+�   +-- Dockerfile
+�   +-- pom.xml
++-- kafka/                          # Kafka data volume mount point
++-- kafka-communication-flow.txt   # Technical documentation
++-- .gitignore
++-- README.md
+```
 
 ---
 
-## License
+## ?? API Endpoints
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+### Producer Endpoints
+
+Both producers expose REST endpoints for generating test logs:
+
+**Producer One (Port 3001)**
+- `POST /api/logs/info` - Generate INFO log
+- `POST /api/logs/error` - Generate ERROR log
+- `POST /api/logs/debug` - Generate DEBUG log
+
+**Producer Two (Port 3002)**
+- `POST /api/logs/info` - Generate INFO log
+- `POST /api/logs/error` - Generate ERROR log
+- `POST /api/logs/debug` - Generate DEBUG log
+
+### Aggregator Endpoints
+
+**Aggregator (Port 3003)**
+- `GET /api/logs` - Retrieve all logs from MongoDB
+- `GET /api/logs/service/{serviceName}` - Filter logs by service
+- `GET /api/logs/level/{logLevel}` - Filter logs by log level
+- `GET /api/logs/trace/{traceId}` - Filter logs by trace ID
 
 ---
 
-## Contact
+## ?? Monitoring
 
-**Author:** [AhmedAymannn](https://github.com/AhmedAymannn)  
-Project link: [AhmedAymannn/distributed-log-aggregation-system](https://github.com/AhmedAymannn/distributed-log-aggregation-system)
+### Kafka UI
+
+Access the Kafka UI at **http://localhost:8081** to:
+
+- View all topics (`app-logs`)
+- Monitor consumer groups
+- Inspect messages in real-time
+- View consumer lag and offsets
+- Manage topic partitions
+
+### MongoDB
+
+Connect to MongoDB using:
+
+```bash
+# Using mongosh
+mongosh -u admin -p super_secret_secure_password_2026 --authenticationDatabase admin
+
+# Connection string
+mongodb://admin:super_secret_secure_password_2026@localhost:27017/logs_db
+```
+
+### Log Files
+
+Producer logs are also written to local files:
+- `log-producer-one/producer_1.log`
+- `log-producer-two/producer_2.log`
+
+---
+
+## ?? Development
+
+### Local Development (Without Docker)
+
+#### Prerequisites
+- Java 21
+- Maven 3.8+
+- Kafka running locally (port 9092)
+- MongoDB running locally (port 27017)
+
+#### Build and Run
+
+```bash
+# Build aggregator
+cd aggregator
+mvn clean package
+java -jar target/aggregator.jar
+
+# Build producer one
+cd ../log-producer-one
+mvn clean package
+java -jar target/log-producer-one.jar
+
+# Build producer two
+cd ../log-producer-two
+mvn clean package
+java -jar target/log-producer-two.jar
+```
+
+### Running Tests
+
+```bash
+cd aggregator
+mvn test
+
+cd ../log-producer-one
+mvn test
+
+cd ../log-producer-two
+mvn test
+```
+
+---
+
+## ?? Extending the System
+
+### Adding a New Producer
+
+1. **Copy existing producer**:
+   ```bash
+   cp -r log-producer-one log-producer-three
+   ```
+
+2. **Update configuration**:
+   - Edit `log-producer-three/pom.xml` (artifactId, name)
+   - Edit `log-producer-three/src/main/resources/application.yml` (port, app name)
+   - Edit `log-producer-three/src/main/java/com/myorg/ProducerThree.java`
+
+3. **Add to docker-compose.yml**:
+   ```yaml
+   producer-three:
+     build:
+       context: ../log-producer-three
+       dockerfile: Dockerfile
+     container_name: producer-three
+     ports:
+       - "${PORT_PRODUCER_THREE}:3004"
+     environment:
+       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+   ```
+
+4. **Add to .env**:
+   ```env
+   PORT_PRODUCER_THREE=3004
+   ```
+
+### Adding a New Aggregator
+
+1. **Copy existing aggregator**:
+   ```bash
+   cp -r aggregator aggregator-secondary
+   ```
+
+2. **Update configuration**:
+   - Edit `aggregator-secondary/pom.xml` (artifactId, name)
+   - Edit `aggregator-secondary/src/main/resources/application.yml` (port, consumer group)
+   - Change consumer group ID to create a separate consumer group
+
+3. **Add to docker-compose.yml**:
+   ```yaml
+   aggregator-secondary:
+     build:
+       context: ../aggregator-secondary
+       dockerfile: Dockerfile
+     container_name: aggregator-secondary
+     depends_on:
+       - kafka
+     environment:
+       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+     ports:
+       - "${PORT_AGGREGATOR_TWO}:3004"
+   ```
+
+### Adding Custom Log Processing
+
+Modify `aggregator/src/main/java/com/myorg/Service/AggregatorService.java` to add custom processing logic:
+
+```java
+@Service
+public class AggregatorService {
+    
+    @KafkaListener(topics = "app-logs", groupId = "aggregator-group")
+    public void consumeLogs(List<String> messages) {
+        // Add your custom processing logic here
+        messages.forEach(message -> {
+            // Parse, transform, enrich, or forward logs
+        });
+    }
+}
+```
+
+---
+
+## ?? Troubleshooting
+
+### Kafka Connection Issues
+
+**Problem**: Producers cannot connect to Kafka
+
+**Solution**:
+1. Verify Kafka is running: `docker ps | grep kafka`
+2. Check port mapping: Ensure port 9092 is not in use
+3. Review Kafka logs: `docker logs kafka`
+4. Verify `SPRING_KAFKA_BOOTSTRAP_SERVERS` in docker-compose.yml
+
+### MongoDB Connection Issues
+
+**Problem**: Aggregator cannot connect to MongoDB
+
+**Solution**:
+1. Verify MongoDB is running: `docker ps | grep mongo`
+2. Check credentials in `.env` and `application.yml`
+3. Review MongoDB logs: `docker logs log_aggregator_db`
+4. Ensure MongoDB URI format is correct
+
+### Logs Not Appearing in Kafka UI
+
+**Problem**: Messages published but not visible in Kafka UI
+
+**Solution**:
+1. Verify topic name matches (`app-logs`)
+2. Check Kafka UI connection settings
+3. Ensure producers are actually generating logs
+4. Review producer logs: `docker logs producer-one`
+
+### Consumer Lag
+
+**Problem**: Aggregator falling behind producers
+
+**Solution**:
+1. Increase batch size in aggregator configuration
+2. Add more aggregator instances (horizontal scaling)
+3. Check MongoDB write performance
+4. Review aggregator error logs
+
+### Port Conflicts
+
+**Problem**: Services fail to start due to port conflicts
+
+**Solution**:
+1. Modify ports in `Infrastructure/.env`
+2. Ensure no other applications are using the configured ports
+3. Restart services: `docker-compose down && docker-compose up`
+
+---
+
+## ?? Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Commit your changes**: `git commit -m 'Add amazing feature'`
+4. **Push to the branch**: `git push origin feature/amazing-feature`
+5. **Open a Pull Request**
+
+### Development Guidelines
+
+- Follow existing code style and conventions
+- Add tests for new features
+- Update documentation as needed
+- Ensure all tests pass before submitting PR
+
+---
+
+## ?? License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## ?? Author
+
+**AhmedAymannn**
+
+- GitHub: [@AhmedAymannn](https://github.com/AhmedAymannn)
+- Project: [distributed-log-aggregation-system](https://github.com/AhmedAymannn/distributed-log-aggregation-system)
+
+---
+
+## ?? Acknowledgments
+
+- [Spring Boot](https://spring.io/projects/spring-boot) for the excellent framework
+- [Apache Kafka](https://kafka.apache.org/) for the robust messaging platform
+- [MongoDB](https://www.mongodb.com/) for the flexible document database
+- [logback-kafka-appender](https://github.com/danielwegener/logback-kafka-appender) for seamless Kafka integration
+
+---
+
+## ?? Additional Resources
+
+- [Kafka Documentation](https://kafka.apache.org/documentation/)
+- [Spring Kafka Reference](https://docs.spring.io/spring-kafka/reference/)
+- [MongoDB Documentation](https://docs.mongodb.com/)
+- [Docker Compose Reference](https://docs.docker.com/compose/)
+- [Technical Details](kafka-communication-flow.txt) - Deep dive into Kafka communication flow
+
+---
+
+**Built with ?? using Java, Spring Boot, Kafka, and MongoDB**
