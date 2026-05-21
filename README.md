@@ -1,4 +1,4 @@
-# ?? Distributed Log Aggregation System
+# 👨‍🔧 Distributed Log Aggregation System
 
 [![Java Version](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.14-brightgreen.svg)](https://spring.io/projects/spring-boot)
@@ -10,7 +10,7 @@ A production-ready, scalable distributed log aggregation system demonstrating mi
 
 ---
 
-## ?? Table of Contents
+## 📚 Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
