@@ -226,23 +226,6 @@ spring:
       group-id: aggregator-group
 ```
 
-### MongoDB Configuration
-
-Logs are stored with automatic TTL expiration:
-
-```java
-@Indexed(name = "ttl_index", expireAfter = "7d")
-Instant timestamp
-```
-
----
-
-## ?? Project Structure
-
-
-
----
-
 ## ?? API Endpoints
 
 ### Producer Endpoints
@@ -330,20 +313,6 @@ mvn clean package
 java -jar target/log-producer-two.jar
 ```
 
-### Running Tests
-
-```bash
-cd aggregator
-mvn test
-
-cd ../log-producer-one
-mvn test
-
-cd ../log-producer-two
-mvn test
-```
-
----
 
 ## ?? Extending the System
 
