@@ -239,54 +239,7 @@ Instant timestamp
 
 ## ?? Project Structure
 
-```
-distributed-log-aggregation-system/
-+-- Infrastructure/
-�   +-- .env                      # Environment variables
-�   +-- docker-compose.yml        # Service orchestration
-+-- aggregator/
-�   +-- src/main/
-�   �   +-- java/com/myorg/
-�   �   �   +-- Aggregator.java           # Main application
-�   �   �   +-- Service/
-�   �   �   �   +-- AggregatorService.java # Log processing logic
-�   �   �   +-- config/
-�   �   �   �   +-- KafkaConsumerConfig.java
-�   �   �   +-- document/
-�   �   �   �   +-- LogDocument.java      # MongoDB document model
-�   �   �   +-- repository/
-�   �   �   �   +-- LogRepository.java    # MongoDB repository
-�   �   �   +-- common/
-�   �   �   �   +-- ConsumerErrorHandler.java
-�   �   �   +-- api/
-�   �   �       +-- LogController.java
-�   �   +-- resources/
-�   �       +-- application.yml
-�   +-- Dockerfile
-�   +-- pom.xml
-+-- log-producer-one/
-�   +-- src/main/
-�   �   +-- java/com/myorg/
-�   �   �   +-- ProducerOne.java
-�   �   +-- resources/
-�   �       +-- application.yml
-�   �       +-- logback-spring.xml
-�   +-- Dockerfile
-�   +-- pom.xml
-+-- log-producer-two/
-�   +-- src/main/
-�   �   +-- java/com/myorg/
-�   �   �   +-- ProducerTwo.java
-�   �   +-- resources/
-�   �       +-- application.yml
-�   �       +-- logback-spring.xml
-�   +-- Dockerfile
-�   +-- pom.xml
-+-- kafka/                          # Kafka data volume mount point
-+-- kafka-communication-flow.txt   # Technical documentation
-+-- .gitignore
-+-- README.md
-```
+
 
 ---
 
