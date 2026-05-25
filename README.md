@@ -102,19 +102,7 @@ docker-compose up --build
 - **Kafka Broker**: localhost:9092
 - **MongoDB**: localhost:27017
 
-### 5. Stop Services
 
-```bash
-docker-compose down
-```
-
-To remove volumes (including MongoDB data):
-
-```bash
-docker-compose down -v
-```
-
----
 
 ## ?? Configuration
 
