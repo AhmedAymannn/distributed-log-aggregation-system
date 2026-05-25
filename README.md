@@ -84,28 +84,7 @@ Before running this project, ensure you have installed:
 
 ## ?? Quick Start
 
-### 1. Clone the Repository
 
-```bash
-git clone https://github.com/AhmedAymannn/distributed-log-aggregation-system.git
-cd distributed-log-aggregation-system
-```
-
-### 2. Configure Environment (Optional)
-
-Edit `Infrastructure/.env` to customize ports and credentials:
-
-```env
-MONGO_ROOT_USER=admin
-MONGO_ROOT_PASSWORD=super_secret_secure_password_2026
-KAFKA_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
-
-PORT_KAFKA=9092
-PORT_KAFKA_UI=8081
-PORT_PRODUCER_ONE=3001
-PORT_PRODUCER_TWO=3002
-PORT_AGGREGATOR=3003
-```
 
 ### 3. Start All Services
 
