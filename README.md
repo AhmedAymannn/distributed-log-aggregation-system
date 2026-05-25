@@ -86,21 +86,13 @@ Before running this project, ensure you have installed:
 
 
 
-### 3. Start All Services
+### 1. Start All Services
 
 ```bash
 cd Infrastructure
 docker-compose up --build
 ```
 
-### 4. Verify Services
-
-- **Producer One**: http://localhost:3001
-- **Producer Two**: http://localhost:3002
-- **Aggregator**: http://localhost:3003
-- **Kafka UI**: http://localhost:8081
-- **Kafka Broker**: localhost:9092
-- **MongoDB**: localhost:27017
 
 
 
