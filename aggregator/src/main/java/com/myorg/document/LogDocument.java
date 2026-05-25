@@ -12,7 +12,7 @@ public record LogDocument(
         String id,
 
         @Indexed(name = "ttl_index", expireAfter = "7d")
-        Instant timestamp, // Changed from Date to Instant
+        Instant timestamp, 
 
         @Indexed
         String serviceName,
