@@ -55,21 +55,6 @@ This project implements a modern distributed logging architecture without interm
 
 ---
 
-## ??? Tech Stack
-
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| **Language** | Java | 21 |
-| **Framework** | Spring Boot | 3.5.14 |
-| **Message Broker** | Apache Kafka | 7.5.0 (KRaft mode) |
-| **Database** | MongoDB | 8.0 |
-| **Build Tool** | Maven | Latest |
-| **Containerization** | Docker & Docker Compose | Latest |
-| **Log Appender** | logback-kafka-appender | 0.1.0 |
-| **Log Encoder** | logstash-logback-encoder | 8.0 |
-| **Kafka UI** | provectuslabs/kafka-ui | Latest |
-
----
 
 ## ? Features
 
@@ -99,58 +84,17 @@ Before running this project, ensure you have installed:
 
 ## ?? Quick Start
 
-### 1. Clone the Repository
 
-```bash
-git clone https://github.com/AhmedAymannn/distributed-log-aggregation-system.git
-cd distributed-log-aggregation-system
-```
 
-### 2. Configure Environment (Optional)
-
-Edit `Infrastructure/.env` to customize ports and credentials:
-
-```env
-MONGO_ROOT_USER=admin
-MONGO_ROOT_PASSWORD=super_secret_secure_password_2026
-KAFKA_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
-
-PORT_KAFKA=9092
-PORT_KAFKA_UI=8081
-PORT_PRODUCER_ONE=3001
-PORT_PRODUCER_TWO=3002
-PORT_AGGREGATOR=3003
-```
-
-### 3. Start All Services
+### 1. Start All Services
 
 ```bash
 cd Infrastructure
 docker-compose up --build
 ```
 
-### 4. Verify Services
 
-- **Producer One**: http://localhost:3001
-- **Producer Two**: http://localhost:3002
-- **Aggregator**: http://localhost:3003
-- **Kafka UI**: http://localhost:8081
-- **Kafka Broker**: localhost:9092
-- **MongoDB**: localhost:27017
 
-### 5. Stop Services
-
-```bash
-docker-compose down
-```
-
-To remove volumes (including MongoDB data):
-
-```bash
-docker-compose down -v
-```
-
----
 
 ## ?? Configuration
 
