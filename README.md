@@ -55,21 +55,6 @@ This project implements a modern distributed logging architecture without interm
 
 ---
 
-## ??? Tech Stack
-
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| **Language** | Java | 21 |
-| **Framework** | Spring Boot | 3.5.14 |
-| **Message Broker** | Apache Kafka | 7.5.0 (KRaft mode) |
-| **Database** | MongoDB | 8.0 |
-| **Build Tool** | Maven | Latest |
-| **Containerization** | Docker & Docker Compose | Latest |
-| **Log Appender** | logback-kafka-appender | 0.1.0 |
-| **Log Encoder** | logstash-logback-encoder | 8.0 |
-| **Kafka UI** | provectuslabs/kafka-ui | Latest |
-
----
 
 ## ? Features
 
