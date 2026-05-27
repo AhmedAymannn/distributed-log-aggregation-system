@@ -290,59 +290,6 @@ public class AggregatorService {
 
 ---
 
-## ?? Troubleshooting
-
-### Kafka Connection Issues
-
-**Problem**: Producers cannot connect to Kafka
-
-**Solution**:
-1. Verify Kafka is running: `docker ps | grep kafka`
-2. Check port mapping: Ensure port 9092 is not in use
-3. Review Kafka logs: `docker logs kafka`
-4. Verify `SPRING_KAFKA_BOOTSTRAP_SERVERS` in docker-compose.yml
-
-### MongoDB Connection Issues
-
-**Problem**: Aggregator cannot connect to MongoDB
-
-**Solution**:
-1. Verify MongoDB is running: `docker ps | grep mongo`
-2. Check credentials in `.env` and `application.yml`
-3. Review MongoDB logs: `docker logs log_aggregator_db`
-4. Ensure MongoDB URI format is correct
-
-### Logs Not Appearing in Kafka UI
-
-**Problem**: Messages published but not visible in Kafka UI
-
-**Solution**:
-1. Verify topic name matches (`app-logs`)
-2. Check Kafka UI connection settings
-3. Ensure producers are actually generating logs
-4. Review producer logs: `docker logs producer-one`
-
-### Consumer Lag
-
-**Problem**: Aggregator falling behind producers
-
-**Solution**:
-1. Increase batch size in aggregator configuration
-2. Add more aggregator instances (horizontal scaling)
-3. Check MongoDB write performance
-4. Review aggregator error logs
-
-### Port Conflicts
-
-**Problem**: Services fail to start due to port conflicts
-
-**Solution**:
-1. Modify ports in `Infrastructure/.env`
-2. Ensure no other applications are using the configured ports
-3. Restart services: `docker-compose down && docker-compose up`
-
----
-
 
 ## ?? License
 
