@@ -45,17 +45,6 @@ This project implements a modern distributed logging architecture without interm
 ---
 
 
-### Data Flow
-
-1. **Producers** generate application logs using SLF4J/Logback
-2. **logback-kafka-appender** serializes logs to JSON and publishes to Kafka topic `app-logs`
-3. **Kafka** (KRaft mode) buffers and distributes messages to consumer groups
-4. **Aggregator** consumes logs in batches using Spring Kafka
-5. **MongoDB** persists structured logs with automatic indexing and TTL cleanup
-
----
-
-
 ## ? Features
 
 - **Direct Kafka Integration**: No intermediate agents�producers write directly to Kafka
