@@ -8,7 +8,6 @@ import java.util.List;
 
 @Component
 public class LogConsumer {
-
     private static final Logger log = LoggerFactory.getLogger(LogConsumer.class);
     private final AggregatorService aggregatorService;
 

@@ -37,17 +37,22 @@ public class AggregatorService {
         }
 
         if (!validLogs.isEmpty()) {
-            logRepository.saveAll(validLogs);
-            log.info("Saved {} logs to MongoDB", validLogs.size());
+            try {
+                logRepository.saveAll(validLogs);
+                log.info("Saved {} logs to MongoDB", validLogs.size());
+            } catch (Exception ex) {
+                log.error("CRITICAL: Failed to persist verified log batch to MongoDB!", ex);
+                throw ex;
+            }
         }
     }
 
     private boolean isValid(LogDocument log) {
         return log != null
-                && log.timestamp() != null
-                && log.serviceName() != null
-                && log.logLevel() != null
-                && log.message() != null;
+                && log.getTimestamp() != null
+                && log.getServiceName() != null
+                && log.getLogLevel() != null
+                && log.getMessage() != null;
     }
 
 }
