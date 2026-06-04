@@ -27,7 +27,6 @@ public class LogDocument {
 
         public LogDocument() {}
 
-        // 2. THE HOOK: Jackson redirects all unexpected JSON keys straight into this method
         @JsonAnySetter
         public void handleUnknownField(String key, Object value) {
                 this.metadata.put(key, value);
