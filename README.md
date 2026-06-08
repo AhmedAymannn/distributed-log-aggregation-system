@@ -134,18 +134,6 @@ Both producers expose REST endpoints for generating test logs:
 - `POST /api/logs/error` - Generate ERROR log
 - `POST /api/logs/debug` - Generate DEBUG log
 
-**Producer Two (Port 3002)**
-- `POST /api/logs/info` - Generate INFO log
-- `POST /api/logs/error` - Generate ERROR log
-- `POST /api/logs/debug` - Generate DEBUG log
-
-### Aggregator Endpoints
-
-**Aggregator (Port 3003)**
-- `GET /api/logs` - Retrieve all logs from MongoDB
-- `GET /api/logs/service/{serviceName}` - Filter logs by service
-- `GET /api/logs/level/{logLevel}` - Filter logs by log level
-- `GET /api/logs/trace/{traceId}` - Filter logs by trace ID
 
 ---
 
