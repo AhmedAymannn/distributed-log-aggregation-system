@@ -123,19 +123,6 @@ spring:
       group-id: aggregator-group
 ```
 
-## ?? API Endpoints
-
-### Producer Endpoints
-
-Both producers expose REST endpoints for generating test logs:
-
-**Producer One (Port 3001)**
-- `POST /api/logs/info` - Generate INFO log
-- `POST /api/logs/error` - Generate ERROR log
-- `POST /api/logs/debug` - Generate DEBUG log
-
-
----
 
 ## ?? Monitoring
 
