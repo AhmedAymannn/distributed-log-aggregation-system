@@ -75,16 +75,6 @@ Before running this project, ensure you have installed:
 
 
 
-### 1. Start All Services
-
-```bash
-cd Infrastructure
-docker-compose up --build
-```
-
-
-
-
 ## ?? Configuration
 
 ### Kafka Configuration
