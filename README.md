@@ -235,24 +235,6 @@ java -jar target/log-producer-two.jar
        - "${PORT_AGGREGATOR_TWO}:3004"
    ```
 
-### Adding Custom Log Processing
-
-Modify `aggregator/src/main/java/com/myorg/Service/AggregatorService.java` to add custom processing logic:
-
-```java
-@Service
-public class AggregatorService {
-    
-    @KafkaListener(topics = "app-logs", groupId = "aggregator-group")
-    public void consumeLogs(List<String> messages) {
-        // Add your custom processing logic here
-        messages.forEach(message -> {
-            // Parse, transform, enrich, or forward logs
-        });
-    }
-}
-```
-
 ---
 
 
