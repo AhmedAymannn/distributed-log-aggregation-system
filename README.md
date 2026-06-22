@@ -280,14 +280,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## ?? Additional Resources
 
-- [Kafka Documentation](https://kafka.apache.org/documentation/)
-- [Spring Kafka Reference](https://docs.spring.io/spring-kafka/reference/)
-- [MongoDB Documentation](https://docs.mongodb.com/)
-- [Docker Compose Reference](https://docs.docker.com/compose/)
-- [Technical Details](kafka-communication-flow.txt) - Deep dive into Kafka communication flow
-
----
-
-**Built with ?? using Java, Spring Boot, Kafka, and MongoDB**
