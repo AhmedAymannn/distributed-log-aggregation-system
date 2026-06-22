@@ -269,15 +269,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - GitHub: [@AhmedAymannn](https://github.com/AhmedAymannn)
 - Project: [distributed-log-aggregation-system](https://github.com/AhmedAymannn/distributed-log-aggregation-system)
 
----
-
-## ?? Acknowledgments
-
-- [Spring Boot](https://spring.io/projects/spring-boot) for the excellent framework
-- [Apache Kafka](https://kafka.apache.org/) for the robust messaging platform
-- [MongoDB](https://www.mongodb.com/) for the flexible document database
-- [logback-kafka-appender](https://github.com/danielwegener/logback-kafka-appender) for seamless Kafka integration
-
----
-
-
