@@ -1,4 +1,5 @@
 package com.myorg.Service;
+import com.myorg.common.LogEvent;
 import com.myorg.document.LogDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -24,14 +25,14 @@ public class AggregatorService {
         this.mongoTemplate = mongoTemplate;
     }
 
-    public void processBatch(List<String> messages) {
-        if (messages == null || messages.isEmpty()) return;
+    public void processBatch(List<LogEvent> events) {
+        if (events == null || events.isEmpty()) return;
         BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, LogDocument.class);
         int validLogCount = 0;
 
-        for (String message : messages) {
+        for (LogEvent event: events) {
             try {
-                LogDocument logDocument = objectMapper.readValue(message, LogDocument.class);
+                LogDocument logDocument = objectMapper.convertValue(event , LogDocument.class);
 
                 if (isValid(logDocument)) {
                     Query query = new Query(Criteria.where("id").is(logDocument.getId()));
@@ -48,7 +49,7 @@ public class AggregatorService {
                     bulkOps.upsert(query, update);
                     validLogCount++;
                 } else {
-                    log.warn("Skipped log due to missing mandatory structural fields: {}", message);
+                    log.warn("Skipped log due to missing mandatory structural fields: {}", event);
                 }
 
             } catch (Exception ex) {

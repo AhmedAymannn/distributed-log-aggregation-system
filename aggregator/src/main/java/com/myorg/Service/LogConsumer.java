@@ -1,4 +1,5 @@
 package com.myorg.Service;
+import com.myorg.common.LogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -18,8 +19,8 @@ public class LogConsumer {
             topics = "app-logs",
             containerFactory = "kafkaListenerContainerFactory"
     )
-    public void consume(List<String> messages) {
-        log.info("Received batch with {} logs", messages.size());
-        aggregatorService.processBatch(messages);
+    public void consume(List<LogEvent> event) {
+        log.info("Received batch with {} logs", event.size());
+        aggregatorService.processBatch(event);
     }
 }
