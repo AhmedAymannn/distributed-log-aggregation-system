@@ -3,6 +3,7 @@ import com.myorg.common.LogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,9 +19,11 @@ public class LogConsumer {
     @KafkaListener(
             topics = "app-logs",
             containerFactory = "kafkaListenerContainerFactory"
+
     )
-    public void consume(List<LogEvent> event) {
+    public void consume(List<LogEvent> event , Acknowledgment ack) {
         log.info("Received batch with {} logs", event.size());
         aggregatorService.processBatch(event);
+        ack.acknowledge();
     }
 }
