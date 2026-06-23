@@ -75,16 +75,6 @@ Before running this project, ensure you have installed:
 
 
 
-### 1. Start All Services
-
-```bash
-cd Infrastructure
-docker-compose up --build
-```
-
-
-
-
 ## ?? Configuration
 
 ### Kafka Configuration
@@ -123,31 +113,6 @@ spring:
       group-id: aggregator-group
 ```
 
-## ?? API Endpoints
-
-### Producer Endpoints
-
-Both producers expose REST endpoints for generating test logs:
-
-**Producer One (Port 3001)**
-- `POST /api/logs/info` - Generate INFO log
-- `POST /api/logs/error` - Generate ERROR log
-- `POST /api/logs/debug` - Generate DEBUG log
-
-**Producer Two (Port 3002)**
-- `POST /api/logs/info` - Generate INFO log
-- `POST /api/logs/error` - Generate ERROR log
-- `POST /api/logs/debug` - Generate DEBUG log
-
-### Aggregator Endpoints
-
-**Aggregator (Port 3003)**
-- `GET /api/logs` - Retrieve all logs from MongoDB
-- `GET /api/logs/service/{serviceName}` - Filter logs by service
-- `GET /api/logs/level/{logLevel}` - Filter logs by log level
-- `GET /api/logs/trace/{traceId}` - Filter logs by trace ID
-
----
 
 ## ?? Monitoring
 
@@ -270,24 +235,6 @@ java -jar target/log-producer-two.jar
        - "${PORT_AGGREGATOR_TWO}:3004"
    ```
 
-### Adding Custom Log Processing
-
-Modify `aggregator/src/main/java/com/myorg/Service/AggregatorService.java` to add custom processing logic:
-
-```java
-@Service
-public class AggregatorService {
-    
-    @KafkaListener(topics = "app-logs", groupId = "aggregator-group")
-    public void consumeLogs(List<String> messages) {
-        // Add your custom processing logic here
-        messages.forEach(message -> {
-            // Parse, transform, enrich, or forward logs
-        });
-    }
-}
-```
-
 ---
 
 
@@ -304,25 +251,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - GitHub: [@AhmedAymannn](https://github.com/AhmedAymannn)
 - Project: [distributed-log-aggregation-system](https://github.com/AhmedAymannn/distributed-log-aggregation-system)
 
----
-
-## ?? Acknowledgments
-
-- [Spring Boot](https://spring.io/projects/spring-boot) for the excellent framework
-- [Apache Kafka](https://kafka.apache.org/) for the robust messaging platform
-- [MongoDB](https://www.mongodb.com/) for the flexible document database
-- [logback-kafka-appender](https://github.com/danielwegener/logback-kafka-appender) for seamless Kafka integration
-
----
-
-## ?? Additional Resources
-
-- [Kafka Documentation](https://kafka.apache.org/documentation/)
-- [Spring Kafka Reference](https://docs.spring.io/spring-kafka/reference/)
-- [MongoDB Documentation](https://docs.mongodb.com/)
-- [Docker Compose Reference](https://docs.docker.com/compose/)
-- [Technical Details](kafka-communication-flow.txt) - Deep dive into Kafka communication flow
-
----
-
-**Built with ?? using Java, Spring Boot, Kafka, and MongoDB**
