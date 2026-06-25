@@ -1,20 +1,19 @@
 package com.myorg.Service;
-
-
-import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myorg.common.LogEvent;
-import com.myorg.document.FailedLog;
 import com.myorg.document.LogDocument;
 import com.myorg.repository.FailedLogRepository;
 import org.springframework.data.mongodb.BulkOperationException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import com.mongodb.bulk.BulkWriteError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,13 +24,17 @@ public class AggregatorService {
     private final MongoTemplate mongoTemplate;
     private final ObjectMapper objectMapper;
     private final FailedLogRepository failedLogRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private static final Logger log = LoggerFactory.getLogger(AggregatorService.class);
 
     public AggregatorService(MongoTemplate mongoTemplate,
                              ObjectMapper objectMapper,
-                             FailedLogRepository failedLogRepository) {
+                             FailedLogRepository failedLogRepository,
+                             KafkaTemplate kafkaTemplate) {
         this.mongoTemplate = mongoTemplate;
         this.objectMapper = objectMapper;
         this.failedLogRepository = failedLogRepository;
+        this.kafkaTemplate = kafkaTemplate ;
     }
 
     public void processBatch(List<LogEvent> events) {
@@ -87,9 +90,6 @@ public class AggregatorService {
             throw e;
         }
     }
-
-
-
 
     private boolean isValid(LogDocument doc) {
         return doc.getId() != null &&
