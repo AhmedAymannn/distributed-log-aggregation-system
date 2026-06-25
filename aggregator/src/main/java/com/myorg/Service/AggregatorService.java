@@ -1,6 +1,7 @@
 package com.myorg.Service;
 
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myorg.common.LogEvent;
 import com.myorg.document.FailedLog;
@@ -36,11 +37,23 @@ public class AggregatorService {
     public void processBatch(List<LogEvent> events) {
 
         if (events == null || events.isEmpty()) return;
+
+        List<LogDocument> validDocs = new ArrayList<>();
         BulkOperations bulkOps =
                 mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, LogDocument.class);
 
-        List<LogDocument> validDocs = new ArrayList<>();
-
+        for (LogEvent event : events) {
+            try {
+                LogDocument doc = objectMapper.convertValue(event, LogDocument.class);
+                if (isValid(doc)) {
+                    validDocs.add(doc);
+                } else {
+                    sendToDlq(event, "VALIDATION_FAILED");
+                }
+            } catch (Exception e) {
+                sendToDlq(event, "MAPPING_FAILED");
+            }
+        }
         if (validDocs.isEmpty()) return;
 
         for (LogDocument doc : validDocs) {
@@ -58,24 +71,42 @@ public class AggregatorService {
 
             bulkOps.upsert(query, update);
         }
-
-
+// 3. EXECUTION & ERROR RECONCILIATION
+        try {
+            bulkOps.execute();
+        } catch (BulkOperationException ex) {
+            // Handle partial failures from MongoDB (e.g., uniqueness constraint)
+            ex.getErrors().forEach(error -> {
+                LogDocument failedDoc = validDocs.get(error.getIndex());
+                // Attempt a final single save or direct to DLQ
+                handleMongoFailure(failedDoc, error.getMessage());
+            });
+        } catch (Exception e) {
+            // If DB is down, rethrow to trigger Kafka retry
+            log.error("Fatal MongoDB error: {}", e.getMessage());
+            throw e;
         }
+    }
+
 
 
 
     private boolean isValid(LogDocument doc) {
-
         return doc.getId() != null &&
                 doc.getTimestamp() != null &&
                 doc.getServiceName() != null;
     }
-
-    private void sendToDlq (){
-
+    private void handleMongoFailure(LogDocument doc, String reason) {
+        try {
+            mongoTemplate.save(doc); // Final effort retry
+        } catch (Exception e) {
+            sendToDlq(doc, "MONGO_FINAL_FAILURE: " + reason);
+        }
     }
-    private void handleBulkFailure(){
-        
+
+    private void sendToDlq(Object payload, String reason) {
+        log.warn("Routing to DLQ. Reason: {}", reason);
+        kafkaTemplate.send("app-logs-dlq", UUID.randomUUID().toString(), payload);
     }
 }
 
