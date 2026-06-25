@@ -22,8 +22,12 @@ public class LogConsumer {
 
     )
     public void consume(List<LogEvent> event , Acknowledgment ack) {
-        log.info("Received batch with {} logs", event.size());
-        aggregatorService.processBatch(event);
-        ack.acknowledge();
+       try{
+           log.info("Received batch with {} logs", event.size());
+           aggregatorService.processBatch(event);
+           ack.acknowledge();
+       }catch (Exception e) {
+           log.error("Fatal processing error. Not acknowledging batch to trigger retry.", e);
+       }
     }
 }

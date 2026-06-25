@@ -1,5 +1,6 @@
 package com.myorg.Service;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myorg.common.LogEvent;
 import com.myorg.document.FailedLog;
@@ -15,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import com.mongodb.bulk.BulkWriteError;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 @Service
 public class AggregatorService {
@@ -34,27 +36,10 @@ public class AggregatorService {
     public void processBatch(List<LogEvent> events) {
 
         if (events == null || events.isEmpty()) return;
-
         BulkOperations bulkOps =
                 mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, LogDocument.class);
 
         List<LogDocument> validDocs = new ArrayList<>();
-
-        for (LogEvent event : events) {
-
-            try {
-                LogDocument doc = objectMapper.convertValue(event, LogDocument.class);
-
-                if (isValid(doc)) {
-                    validDocs.add(doc);
-                } else {
-                    saveToFailedStore(event, "VALIDATION_FAILED", "Missing required fields");
-                }
-
-            } catch (Exception ex) {
-                saveToFailedStore(event, "MAPPING_FAILED", ex.getMessage());
-            }
-        }
 
         if (validDocs.isEmpty()) return;
 
@@ -74,39 +59,9 @@ public class AggregatorService {
             bulkOps.upsert(query, update);
         }
 
-        try {
-            bulkOps.execute();
-            return;
+
         }
 
-        catch (BulkOperationException ex) {
-
-            Set<Integer> failedIndexes = ex.getErrors()
-                    .stream()
-                    .map(BulkWriteError::getIndex)
-                    .collect(Collectors.toSet());
-
-            for (int i = 0; i < validDocs.size(); i++) {
-
-                if (!failedIndexes.contains(i)) continue;
-
-                LogDocument failedDoc = validDocs.get(i);
-
-                try {
-                    // retry single insert
-                    mongoTemplate.save(failedDoc);
-
-                } catch (Exception retryEx) {
-
-                    saveToFailedStore(
-                            failedDoc,
-                            "MONGO_FINAL_FAILURE",
-                            retryEx.getMessage()
-                    );
-                }
-            }
-        }
-    }
 
 
     private boolean isValid(LogDocument doc) {
@@ -116,34 +71,13 @@ public class AggregatorService {
                 doc.getServiceName() != null;
     }
 
-    private void saveToFailedStore(Object data, String reason, String error) {
+    private void sendToDlq (){
 
-        try {
-            String payload = objectMapper.writeValueAsString(data);
-
-            FailedLog failedLog = new FailedLog(
-                    payload,
-                    reason,
-                    error
-            );
-
-            failedLogRepository.save(failedLog);
-
-        } catch (Exception ex) {
-            try {
-                FailedLog fallback = new FailedLog(
-                        String.valueOf(data),
-                        "SERIALIZATION_FAILED",
-                        ex.getMessage()
-                );
-
-                failedLogRepository.save(fallback);
-
-            } catch (Exception fatal) {
-                // absolutely critical failure
-                System.err.println("CRITICAL: failed_logs storage broken");
-                fatal.printStackTrace();
-            }
-        }
+    }
+    private void handleBulkFailure(){
+        
     }
 }
+
+
+
