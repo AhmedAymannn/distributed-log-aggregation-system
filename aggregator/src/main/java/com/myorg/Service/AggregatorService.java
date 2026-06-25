@@ -2,7 +2,6 @@ package com.myorg.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myorg.common.LogEvent;
 import com.myorg.document.LogDocument;
-import com.myorg.repository.FailedLogRepository;
 import org.springframework.data.mongodb.BulkOperationException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
