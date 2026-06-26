@@ -1,6 +1,7 @@
 package com.myorg.document;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,6 +15,7 @@ public class LogDocument {
         @Id
         private String id;
         @Indexed(name = "ttl_index", expireAfter = "7d")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         private Instant timestamp;
         @Indexed
         private String serviceName;
