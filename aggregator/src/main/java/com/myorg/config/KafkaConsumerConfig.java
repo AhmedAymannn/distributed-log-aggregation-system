@@ -36,13 +36,14 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(props);
     }
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory());
         factory.setConcurrency(1);    // one thread
         factory.setBatchListener(true);
+        factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
     @Bean

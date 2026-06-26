@@ -21,17 +21,15 @@ public class AggregatorService {
 
     private final MongoTemplate mongoTemplate;
     private final ObjectMapper objectMapper;
-    private final FailedLogRepository failedLogRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private static final Logger log = LoggerFactory.getLogger(AggregatorService.class);
 
     public AggregatorService(MongoTemplate mongoTemplate,
                              ObjectMapper objectMapper,
-                             FailedLogRepository failedLogRepository,
-                             KafkaTemplate kafkaTemplate) {
+                             KafkaTemplate<String, Object> kafkaTemplate) {
+
         this.mongoTemplate = mongoTemplate;
         this.objectMapper = objectMapper;
-        this.failedLogRepository = failedLogRepository;
         this.kafkaTemplate = kafkaTemplate ;
     }
 
