@@ -1,4 +1,5 @@
 package com.myorg.config;
+import com.myorg.common.LogEvent;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -25,6 +26,7 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConsumerFactory<String, Object> consumerFactory() {
+
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -33,6 +35,9 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, LogEvent.class.getName());
+        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+
         return new DefaultKafkaConsumerFactory<>(props);
     }
     @Bean

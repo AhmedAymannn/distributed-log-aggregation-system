@@ -4,7 +4,14 @@
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
 
     <!-- Read the application name from application.yml -->
-    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="unknown-service"/>
+    <springProperty scope="context" name="appName"
+                    source="spring.application.name"
+                    defaultValue="unknown-service"/>
+
+    <springProperty scope="context" name="kafkaBootstrap"
+                    source="spring.kafka.bootstrap-servers"
+                    defaultValue="localhost:9092"/>
+
 
     <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
@@ -46,7 +53,7 @@
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy" />
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
         <producerConfig>
-            bootstrap.servers=localhost:9092
+            bootstrap.servers=${kafkaBootstrap}
             acks=all
             enable.idempotence=true
             retries=2147483647
