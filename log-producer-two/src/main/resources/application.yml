@@ -1,11 +1,20 @@
 server:
   port: 3002
+
 spring:
   application:
-    name: ProducerTwoApplication
+    name: order-service        # replace with your actual service name
 
   kafka:
     bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    name: log-producer-two/producer_2.log
+  level:
+    root: WARN
+    com.myorg: INFO

@@ -1,19 +1,22 @@
 server:
   port: 3001
+
 spring:
   application:
     name: ProducerOneApplication
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: log-aggregator-group
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 logging:
   config: classpath:logback-spring.xml
   file:
-    name: log-producer-one/producer_1.log # This creates a folder 'logs' and a file 'app.log'
+    name: log-producer-one/producer_1.log
   level:
     root: WARN
     com.myorg: INFO
-
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
