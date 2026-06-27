@@ -1,19 +1,16 @@
 server:
   port: 3003
+
 spring:
   application:
     name: AggregatorApp
+
   kafka:
     bootstrap-servers: localhost:9092
-    listener:
-      type: batch
     consumer:
-      fetch.min.bytes: 500
       auto-offset-reset: earliest
       group-id: aggregator-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
   data:
     mongodb:
       # Format: mongodb://username:password@host:port/database_name
-      uri: mongodb://admin:super_secret_secure_password_2026@localhost:27017/logs_db
+      uri: ${MONGODB_URI:mongodb://admin:password@localhost:27017/logs_db?authSource=admin}
