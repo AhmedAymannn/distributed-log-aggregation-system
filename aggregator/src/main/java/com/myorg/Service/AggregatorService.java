@@ -44,6 +44,10 @@ public class AggregatorService {
         for (LogEvent event : events) {
             try {
                 LogDocument doc = objectMapper.convertValue(event, LogDocument.class);
+                if (doc.getId() == null) {
+                    doc.setId(generateId(event));
+                }
+
                 if (isValid(doc)) {
                     validDocs.add(doc);
                 } else {
@@ -53,10 +57,10 @@ public class AggregatorService {
                 sendToDlq(event, "MAPPING_FAILED");
             }
         }
+
         if (validDocs.isEmpty()) return;
 
         for (LogDocument doc : validDocs) {
-
             Query query = new Query(Criteria.where("id").is(doc.getId()));
 
             Update update = new Update()
@@ -70,26 +74,41 @@ public class AggregatorService {
 
             bulkOps.upsert(query, update);
         }
-// 3. EXECUTION & ERROR RECONCILIATION
+
         try {
             bulkOps.execute();
         } catch (BulkOperationException ex) {
-            // Handle partial failures from MongoDB (e.g., uniqueness constraint)
+            // Use a copy of validDocs mapped by id for safe error reconciliation
+            Map<String, LogDocument> docById = new HashMap<>();
+            validDocs.forEach(d -> docById.put(d.getId(), d));
+
             ex.getErrors().forEach(error -> {
-                LogDocument failedDoc = validDocs.get(error.getIndex());
-                // Attempt a final single save or direct to DLQ
-                handleMongoFailure(failedDoc, error.getMessage());
+                // Extract the id from the error message since index is unreliable
+                // in unordered bulk ops — instead log and DLQ by iterating errors
+                log.error("Bulk write error at index {}: {}", error.getIndex(), error.getMessage());
+                try {
+                    LogDocument failedDoc = validDocs.get(error.getIndex());
+                    handleMongoFailure(failedDoc, error.getMessage());
+                } catch (IndexOutOfBoundsException e) {
+                    log.error("Could not reconcile bulk error at index {}", error.getIndex());
+                }
             });
         } catch (Exception e) {
-            // If DB is down, rethrow to trigger Kafka retry
             log.error("Fatal MongoDB error: {}", e.getMessage());
             throw e;
         }
     }
 
+    // Deterministic id — same log content always produces same id
+    private String generateId(LogEvent event) {
+        String raw = event.serviceName()
+                + event.timestamp()
+                + event.traceId();
+        return UUID.nameUUIDFromBytes(raw.getBytes()).toString();
+    }
+
     private boolean isValid(LogDocument doc) {
-        return doc.getId() != null &&
-                doc.getTimestamp() != null &&
+        return doc.getTimestamp() != null &&
                 doc.getServiceName() != null;
     }
     private void handleMongoFailure(LogDocument doc, String reason) {
