@@ -10,6 +10,9 @@ import java.util.UUID;
 public class LogMapper {
 
     public LogDocument toDocument(LogEvent event) {
+        if (event == null) {
+            throw new IllegalArgumentException("LogEvent cannot be null");
+        }
 
         LogDocument doc = new LogDocument();
         doc.setId(generateId(event));
@@ -19,6 +22,11 @@ public class LogMapper {
         doc.setTraceId(event.traceId());
         doc.setMessage(event.message());
         doc.setDurationMs(event.durationMs());
+
+        if (event.metadata() != null) {
+            doc.setMetadata(event.metadata());
+        }
+
         return doc;
     }
 

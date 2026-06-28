@@ -1,5 +1,10 @@
 package com.myorg.config;
+import com.myorg.Service.LogDlqService;
+import com.myorg.Service.LogProcessingService;
 import com.myorg.common.LogEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -12,11 +17,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
+    private static final Logger log = LoggerFactory.getLogger(KafkaConsumerConfig.class);
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
     @Value("${spring.kafka.consumer.group-id}")
@@ -39,15 +47,25 @@ public class KafkaConsumerConfig {
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
         return new DefaultKafkaConsumerFactory<>(props);
     }
+
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+    public DefaultErrorHandler errorHandler(LogDlqService dlqService) {
+        FixedBackOff backOff = new FixedBackOff(2000L, 3);
+        return new DefaultErrorHandler((record, exception) -> {
+            log.error("Batch failed after retries.");
+        }, backOff);
+    }
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(DefaultErrorHandler errorHandler) {
         ConcurrentKafkaListenerContainerFactory<String, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(1);    // one thread
+        factory.setCommonErrorHandler(errorHandler);
+        factory.setConcurrency(3);    // 3 thread
         factory.setBatchListener(true);
         factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+
         return factory;
     }
     @Bean
@@ -63,4 +81,5 @@ public class KafkaConsumerConfig {
     public KafkaTemplate<String, Object> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
+
 }

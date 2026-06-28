@@ -60,17 +60,4 @@ public class LogRepository {
     }
 
 
-//    private void retryOrDlq(LogDocument doc, String reason) {
-//        if (doc == null) {
-//            log.error("Cannot retry null document. Reason: {}", reason);
-//            return;
-//        }
-//        try {
-//            mongoTemplate.save(doc);
-//            log.info("Single retry successful for id: {}", doc.getId());
-//        } catch (Exception e) {
-//            log.error("Single retry failed for id: {}. Sending to DLQ.", doc.getId());
-//            dlqService.send(doc, "MONGO_FINAL_FAILURE: " + reason);
-//        }
-
 }

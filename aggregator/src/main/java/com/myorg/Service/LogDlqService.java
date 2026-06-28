@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -20,6 +22,12 @@ public class LogDlqService {
 
     public void send(Object payload, String reason) {
         log.warn("Routing to DLQ. Reason: {}", reason);
-        kafkaTemplate.send(DLQ_TOPIC, UUID.randomUUID().toString(), payload);
+
+        Map<String, Object> dlqEnvelope = new HashMap<>();
+        dlqEnvelope.put("failedEvent", payload);
+        dlqEnvelope.put("failureReason", reason);
+        dlqEnvelope.put("timestamp", Instant.now().toString());
+
+        kafkaTemplate.send(DLQ_TOPIC, UUID.randomUUID().toString(), dlqEnvelope);
     }
 }
