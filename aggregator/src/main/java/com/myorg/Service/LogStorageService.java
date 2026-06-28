@@ -14,13 +14,13 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class LogRepository {
+public class LogStorageService {
 
     private final MongoTemplate mongoTemplate;
     private final LogDlqService dlqService;
-    private static final Logger log = LoggerFactory.getLogger(LogRepository.class);
+    private static final Logger log = LoggerFactory.getLogger(LogStorageService.class);
 
-    public LogRepository(MongoTemplate mongoTemplate,
+    public LogStorageService(MongoTemplate mongoTemplate,
                                  LogDlqService dlqService) {
         this.mongoTemplate = mongoTemplate;
         this.dlqService = dlqService;

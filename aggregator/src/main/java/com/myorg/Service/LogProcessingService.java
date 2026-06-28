@@ -1,8 +1,8 @@
 package com.myorg.Service;
 
-import Mapper.LogMapper;
+import com.myorg.mapper.LogMapper;
 import com.myorg.Service.LogDlqService;
-import com.myorg.Service.LogRepository;
+import com.myorg.Service.LogStorageService;
 import com.myorg.Validator.LogValidator;
 import com.myorg.common.LogEvent;
 import com.myorg.document.LogDocument;
@@ -18,17 +18,17 @@ public class LogProcessingService {
 
     private final LogMapper mapper;
     private final LogValidator validator;
-    private final LogRepository logRepository;
+    private final LogStorageService logStorageService;
     private final LogDlqService dlqService;
     private static final Logger log = LoggerFactory.getLogger(LogProcessingService.class);
 
     public LogProcessingService(LogMapper mapper,
                                 LogValidator validator,
-                                LogRepository logRepository,
+                                LogStorageService logStorageService,
                                 LogDlqService dlqService) {
         this.mapper = mapper;
         this.validator = validator;
-        this.logRepository = logRepository;
+        this.logStorageService = logStorageService;
         this.dlqService = dlqService;
     }
 
@@ -51,7 +51,7 @@ public class LogProcessingService {
         }
 
         if (!validDocs.isEmpty()) {
-            logRepository.saveAll(validDocs);
+            logStorageService.saveAll(validDocs);
         }
 
         log.info("Batch processed. Valid: {}, Invalid: {}",

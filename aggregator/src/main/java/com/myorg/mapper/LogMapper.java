@@ -1,4 +1,4 @@
-package Mapper;
+package com.myorg.mapper;
 
 import com.myorg.common.LogEvent;
 import com.myorg.document.LogDocument;
@@ -31,9 +31,10 @@ public class LogMapper {
     }
 
     private String generateId(LogEvent event) {
+        String traceId = event.traceId() != null ? event.traceId() : "";
         String raw = event.serviceName()
                 + event.timestamp()
-                + event.traceId();
+                + traceId;
         return UUID.nameUUIDFromBytes(raw.getBytes()).toString();
     }
 }

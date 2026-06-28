@@ -1,6 +1,5 @@
 package com.myorg.config;
 import com.myorg.Service.LogDlqService;
-import com.myorg.Service.LogProcessingService;
 import com.myorg.common.LogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +51,8 @@ public class KafkaConsumerConfig {
     public DefaultErrorHandler errorHandler(LogDlqService dlqService) {
         FixedBackOff backOff = new FixedBackOff(2000L, 3);
         return new DefaultErrorHandler((record, exception) -> {
-            log.error("Batch failed after retries.");
+            log.error("Batch failed after retries. Sending to DLQ.");
+            dlqService.send(record.value(), "RETRY_EXHAUSTED: " + exception.getMessage());
         }, backOff);
     }
     @Bean
