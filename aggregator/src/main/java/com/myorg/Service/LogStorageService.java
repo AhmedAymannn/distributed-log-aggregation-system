@@ -8,14 +8,12 @@ import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Update;
-
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
-@Component
+@Service
 public class LogStorageService {
 
     private final MongoTemplate mongoTemplate;
@@ -23,13 +21,16 @@ public class LogStorageService {
     private static final Logger log = LoggerFactory.getLogger(LogStorageService.class);
 
     public LogStorageService(MongoTemplate mongoTemplate,
-                                 LogDlqService dlqService) {
+                             LogDlqService dlqService) {
         this.mongoTemplate = mongoTemplate;
         this.dlqService = dlqService;
     }
 
     public void saveAll(List<LogDocument> docs) {
-        BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, LogDocument.class);
+        if (docs == null || docs.isEmpty()) return;
+
+        BulkOperations bulkOps = mongoTemplate
+                .bulkOps(BulkOperations.BulkMode.ORDERED, LogDocument.class);
 
         docs.forEach(doc -> bulkOps.upsert(
                 new Query(Criteria.where("_id").is(doc.getId())),
@@ -38,20 +39,23 @@ public class LogStorageService {
 
         try {
             bulkOps.execute();
+            log.info("Bulk write successful. {} documents saved.", docs.size());
+
         } catch (BulkOperationException ex) {
-            // Slicing: Directly access the failed index using the driver's report
-            ex.getErrors().forEach(error -> {
-                LogDocument failed = docs.get(error.getIndex());
-                dlqService.send(failed, "WRITE_FAILURE: " + error.getMessage());
-            });
+            int failedIndex = ex.getErrors().get(0).getIndex();
+            log.error("Bulk write failed at index {} of {}. Triggering Kafka retry.",
+                    failedIndex, docs.size());
+            throw ex;  // Kafka redelivers whole batch — deterministic id is safe
+
         } catch (Exception e) {
-            // Surface system-level exceptions to trigger Kafka's retry mechanism
-            throw new RuntimeException("System error, triggering batch retry", e);
+            log.error("Fatal MongoDB error. Triggering Kafka retry. Reason: {}", e.getMessage());
+            throw e;
         }
     }
+
     private Update buildUpdate(LogDocument doc) {
         return new Update()
-                .setOnInsert("_id", doc.getId()) // Only sets ID if it's a new insert
+                .setOnInsert("_id", doc.getId())
                 .set("timestamp", doc.getTimestamp())
                 .set("serviceName", doc.getServiceName())
                 .set("logLevel", doc.getLogLevel())
@@ -60,6 +64,4 @@ public class LogStorageService {
                 .set("durationMs", doc.getDurationMs())
                 .set("metadata", doc.getMetadata());
     }
-
-
 }
