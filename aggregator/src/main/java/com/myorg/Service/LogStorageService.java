@@ -45,7 +45,7 @@ public class LogStorageService {
             int failedIndex = ex.getErrors().get(0).getIndex();
             log.error("Bulk write failed at index {} of {}. Triggering Kafka retry.",
                     failedIndex, docs.size());
-            throw ex;  // Kafka redelivers whole batch — deterministic id is safe
+            throw ex;
 
         } catch (Exception e) {
             log.error("Fatal MongoDB error. Triggering Kafka retry. Reason: {}", e.getMessage());

@@ -31,6 +31,7 @@ public class LogConsumer {
             ack.acknowledge();
         } catch (Exception e) {
             log.error("Fatal error processing batch. Triggering retry.", e);
+            throw e;
         }
     }
 }
