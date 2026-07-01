@@ -64,4 +64,28 @@ public class LogStorageService {
                 .set("durationMs", doc.getDurationMs())
                 .set("metadata", doc.getMetadata());
     }
+
+    private void executeBulk(List<LogDocument> docs) {
+
+        BulkOperations bulkOps =
+                mongoTemplate.bulkOps(
+                        BulkOperations.BulkMode.ORDERED,
+                        LogDocument.class);
+
+        docs.forEach(doc ->
+
+                bulkOps.upsert(
+
+                        Query.query(
+                                Criteria.where("_id")
+                                        .is(doc.getId())
+                        ),
+
+                        buildUpdate(doc)
+                )
+        );
+
+        bulkOps.execute();
+    }
+
 }
