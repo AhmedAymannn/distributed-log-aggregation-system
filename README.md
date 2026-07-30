@@ -215,11 +215,6 @@ java -jar target/log-producer-two.jar
    cp -r aggregator aggregator-secondary
    ```
 
-2. **Update configuration**:
-   - Edit `aggregator-secondary/pom.xml` (artifactId, name)
-   - Edit `aggregator-secondary/src/main/resources/application.yml` (port, consumer group)
-   - Change consumer group ID to create a separate consumer group
-
 
 
 ## ?? License
