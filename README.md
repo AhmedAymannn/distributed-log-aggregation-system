@@ -220,22 +220,6 @@ java -jar target/log-producer-two.jar
    - Edit `aggregator-secondary/src/main/resources/application.yml` (port, consumer group)
    - Change consumer group ID to create a separate consumer group
 
-3. **Add to docker-compose.yml**:
-   ```yaml
-   aggregator-secondary:
-     build:
-       context: ../aggregator-secondary
-       dockerfile: Dockerfile
-     container_name: aggregator-secondary
-     depends_on:
-       - kafka
-     environment:
-       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-     ports:
-       - "${PORT_AGGREGATOR_TWO}:3004"
-   ```
-
----
 
 
 ## ?? License
