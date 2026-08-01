@@ -210,10 +210,7 @@ java -jar target/log-producer-two.jar
 
 ### Adding a New Aggregator
 
-1. **Copy existing aggregator**:
-   ```bash
-   cp -r aggregator aggregator-secondary
-   ```
+
 
 
 
