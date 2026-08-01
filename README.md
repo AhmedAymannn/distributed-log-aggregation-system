@@ -203,14 +203,6 @@ java -jar target/log-producer-two.jar
        - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
    ```
 
-4. **Add to .env**:
-   ```env
-   PORT_PRODUCER_THREE=3004
-   ```
-
-### Adding a New Aggregator
-
-
 
 
 
