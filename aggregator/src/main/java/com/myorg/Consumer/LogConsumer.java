@@ -13,11 +13,11 @@ import java.util.List;
 @Component
 public class LogConsumer {
 
-    private final LogProcessingService processingService;
+    private final LogProcessingService logprocessingService;
     private static final Logger log = LoggerFactory.getLogger(LogConsumer.class);
 
-    public LogConsumer(LogProcessingService processingService) {
-        this.processingService = processingService;
+    public LogConsumer(LogProcessingService logprocessingService) {
+        this.logprocessingService = logprocessingService;
     }
 
     @KafkaListener(
@@ -27,7 +27,7 @@ public class LogConsumer {
     public void consume(List<LogEvent> events, Acknowledgment ack) {
         try {
             log.info("Received batch of {} logs", events.size());
-            processingService.processBatch(events);
+            logprocessingService.processBatch(events);
             ack.acknowledge();
         } catch (Exception e) {
             log.error("Fatal error processing batch. Triggering retry.", e);
