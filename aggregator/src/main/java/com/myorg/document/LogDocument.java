@@ -14,17 +14,24 @@ public class LogDocument {
 
         @Id
         private String id;
+
         @Indexed(name = "ttl_index", expireAfter = "7d")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         private Instant timestamp;
+
         @Indexed
         private String serviceName;
+
         @Indexed
         private String logLevel;
+
         @Indexed
         private String traceId;
+
         private String message;
+
         private Long durationMs;
+
         private Map<String, Object> metadata = new HashMap<>();
 
         public LogDocument() {}
